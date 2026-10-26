@@ -151,6 +151,10 @@ If you've **explicitly pinned** a version in your config (e.g. `migros-mcp@0.3.0
 | `get_in_store_receipts` | List in-store receipts (Kassenbons) over a date range. |
 | `get_receipt_details` | URL to view a single in-store receipt's line items in the browser. |
 | `get_cumulus_coupons` | Active personalized Cumulus coupons. |
+| `get_favorite_recipes` | Your favorite (bookmarked) Migusto recipes with slugs, ready for `get_recipe_details`. |
+| `get_cookbooks` | Your Migusto cookbooks (Kochbücher) and the recipes in each. |
+| `add_favorite_recipe` | Bookmark a Migusto recipe by id. |
+| `remove_favorite_recipe` | Remove a Migusto recipe from your favorites. |
 
 ## How it works
 

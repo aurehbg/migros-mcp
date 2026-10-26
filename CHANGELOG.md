@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **Migusto favorites & cookbooks (4 tools)** — `get_favorite_recipes`, `get_cookbooks`, `add_favorite_recipe`, `remove_favorite_recipe`. Migusto keeps its own server session, established silently via OIDC `prompt=none` against login.migros.ch using the SSO cookies already cached for the JWT flow — no extra credentials needed. Recipe ids are resolved to slugs through the `/{lang}/r/{id}` short link.
+
 ## [0.3.1] — 2026-04-28
 
 ### Documentation

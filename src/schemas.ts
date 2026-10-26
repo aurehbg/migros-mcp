@@ -123,3 +123,19 @@ export const GetInStoreReceiptsSchema = z.object({
 export const GetReceiptDetailsSchema = z.object({
   receiptId: z.union([z.string(), z.number()]).describe("Receipt id from get_in_store_receipts."),
 });
+
+// ---------------------------------------------------------------------------
+// Authenticated: Migusto favorites & cookbooks
+// ---------------------------------------------------------------------------
+
+export const GetFavoriteRecipesSchema = z.object({
+  language: z.string().optional().describe("Language for slugs/URLs (de, fr, it). Default: de."),
+});
+
+export const GetCookbooksSchema = z.object({
+  language: z.string().optional().describe("Language for slugs/URLs (de, fr, it). Default: de."),
+});
+
+export const FavoriteRecipeSchema = z.object({
+  recipeId: z.union([z.string(), z.number()]).describe("Numeric Migusto recipe id from search_recipes or get_favorite_recipes."),
+});

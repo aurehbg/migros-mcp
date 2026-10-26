@@ -20,6 +20,9 @@ import {
   GetOrderDetailsSchema,
   GetInStoreReceiptsSchema,
   GetReceiptDetailsSchema,
+  GetFavoriteRecipesSchema,
+  GetCookbooksSchema,
+  FavoriteRecipeSchema,
 } from "./schemas.js";
 import {
   searchProducts,
@@ -46,6 +49,10 @@ import {
   getInStoreReceipts,
   getReceiptDetails,
   getCumulusCoupons,
+  getFavoriteRecipes,
+  getCookbooks,
+  addFavoriteRecipe,
+  removeFavoriteRecipe,
 } from "./auth-tools.js";
 
 // ---------------------------------------------------------------------------
@@ -153,6 +160,24 @@ register(server, "get_receipt_details",
 register(server, "get_cumulus_coupons",
   "List active Cumulus coupons targeted at the user (personalized offers based on shopping history). Requires authentication.",
   {}, () => getCumulusCoupons());
+
+// --- Authenticated: Migusto favorites & cookbooks ---
+
+register(server, "get_favorite_recipes",
+  "List the user's favorite (bookmarked) Migusto recipes: id, slug and URL for each. Use get_recipe_details with the slug for ingredients + instructions. Requires authentication.",
+  GetFavoriteRecipesSchema.shape, (args) => getFavoriteRecipes(args));
+
+register(server, "get_cookbooks",
+  "List the user's Migusto cookbooks (Kochbücher) with the recipes saved in each (id, slug, URL). Requires authentication.",
+  GetCookbooksSchema.shape, (args) => getCookbooks(args));
+
+register(server, "add_favorite_recipe",
+  "Add a Migusto recipe to the user's favorites by numeric recipe id. Requires authentication.",
+  FavoriteRecipeSchema.shape, (args) => addFavoriteRecipe(args));
+
+register(server, "remove_favorite_recipe",
+  "Remove a Migusto recipe from the user's favorites by numeric recipe id. Requires authentication.",
+  FavoriteRecipeSchema.shape, (args) => removeFavoriteRecipe(args));
 
 // ---------------------------------------------------------------------------
 

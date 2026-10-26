@@ -69,6 +69,10 @@
     { "name": "get_cumulus_status", "description": "(Auth) Cumulus loyalty card status: points, level, cardholder" },
     { "name": "get_in_store_receipts", "description": "(Auth) List in-store Migros receipts (Kassenbons) over a date range" },
     { "name": "get_receipt_details", "description": "(Auth) URL to view a single in-store receipt in the browser" },
-    { "name": "get_cumulus_coupons", "description": "(Auth) Active personalized Cumulus coupons" }
+    { "name": "get_cumulus_coupons", "description": "(Auth) Active personalized Cumulus coupons" },
+    { "name": "get_favorite_recipes", "description": "(Auth) Favorite Migusto recipes with slugs" },
+    { "name": "get_cookbooks", "description": "(Auth) Migusto cookbooks and their recipes" },
+    { "name": "add_favorite_recipe", "description": "(Auth) Bookmark a Migusto recipe" },
+    { "name": "remove_favorite_recipe", "description": "(Auth) Remove a Migusto recipe from favorites" }
   ]
 }
