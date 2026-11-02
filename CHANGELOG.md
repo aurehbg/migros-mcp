@@ -7,6 +7,9 @@ All notable changes to this project are documented here. The format is based on 
 ### Added
 - **Migusto favorites & cookbooks (4 tools)** — `get_favorite_recipes`, `get_cookbooks`, `add_favorite_recipe`, `remove_favorite_recipe`. Migusto keeps its own server session, established silently via OIDC `prompt=none` against login.migros.ch using the SSO cookies already cached for the JWT flow — no extra credentials needed. Recipe ids are resolved to slugs through the `/{lang}/r/{id}` short link.
 
+### Fixed
+- **`search_products` with English or multi-word queries** — Migros only matches a query in the language passed with it, so English terms under the default `de` returned almost nothing ("tomatoes": 1 result vs 182 with `en`), and adjective phrases like "fresh tomatoes" returned 0 in every language. When a search finds nothing, it now retries in the other languages, then with only the last word, and reports the variant that matched in `matchedWith`. When it finds fewer than 5 products, it keeps them and adds the result counts for the other languages in `otherLanguages`, without switching automatically, since the largest count is often noise. The `query`/`language` descriptions now say that `language` is the query's language (product names stay German) and to search for bare nouns.
+
 ## [0.3.1] — 2026-04-28
 
 ### Documentation

@@ -5,12 +5,18 @@ import { z } from "zod";
 // ---------------------------------------------------------------------------
 
 export const SearchProductsSchema = z.object({
-  query: z.string().describe("Search query for Migros products"),
+  query: z
+    .string()
+    .describe(
+      "Search query for Migros products. Use a bare noun without adjectives (\"tomatoes\", not \"fresh tomatoes\"); search ranking is literal, so be specific where needed (\"red chili\" finds fresh chilis, \"chili\" mostly finds chips)."
+    ),
   language: z
     .string()
     .optional()
     .default("de")
-    .describe("Language for results (de, fr, it, en). Default: de"),
+    .describe(
+      "Language the query is written in (de, fr, it, en): it controls how the query is matched, not the result labels (product names are always German). Must match the query, e.g. \"tomatoes\" needs en. Default: de. If nothing matches, other languages and the last word alone are tried automatically."
+    ),
 });
 
 export const GetProductDetailsSchema = z.object({

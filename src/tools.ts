@@ -10,29 +10,71 @@ import {
   getRecipeProducts as apiGetRecipeProducts,
 } from "./migros.js";
 
+const SEARCH_LANGUAGES = ["de", "en", "fr", "it"];
+const THIN_RESULT_COUNT = 5;
+
+/**
+ * Migros search only matches a query in the language passed alongside it, and
+ * multi-word queries with adjectives ("fresh tomatoes") return nothing. When
+ * the query as given finds nothing, retry it in the other languages, then
+ * retry with only its last word (usually the noun).
+ */
+function searchAttempts(query: string, language: string): Array<{ query: string; language: string }> {
+  const langs = [language, ...SEARCH_LANGUAGES.filter((l) => l !== language)];
+  const attempts = langs.map((l) => ({ query, language: l }));
+  const words = query.trim().split(/\s+/);
+  if (words.length > 1) {
+    const lastWord = words[words.length - 1];
+    attempts.push(...langs.map((l) => ({ query: lastWord, language: l })));
+  }
+  return attempts;
+}
+
 export async function searchProducts(
   query: string,
   language: string
 ): Promise<string> {
-  const result = await apiSearchProducts(query, language);
+  for (const attempt of searchAttempts(query, language)) {
+    const result = await apiSearchProducts(attempt.query, attempt.language);
+    if (result.productIds.length === 0) continue;
 
-  if (result.productIds.length === 0) {
-    return JSON.stringify({
-      message: `No products found for "${query}"`,
-      numberOfProducts: 0,
-      productIds: [],
-    });
+    const isFallback = attempt.query !== query || attempt.language !== language;
+
+    // A handful of hits often means the query language doesn't match
+    // ("tomatoes" under de → 1 result, under en → 182). Don't guess (the
+    // largest count is often noise), just report what the others return.
+    let otherLanguages: Record<string, number> | undefined;
+    if (!isFallback && result.numberOfProducts < THIN_RESULT_COUNT) {
+      otherLanguages = {};
+      for (const l of SEARCH_LANGUAGES.filter((l) => l !== language)) {
+        otherLanguages[l] = (await apiSearchProducts(query, l)).numberOfProducts;
+      }
+    }
+
+    return JSON.stringify(
+      {
+        numberOfProducts: result.numberOfProducts,
+        productIds: result.productIds,
+        ...(isFallback && {
+          matchedWith: attempt,
+          note: `No results for "${query}" (${language}); showing results for "${attempt.query}" (${attempt.language}). Check product names are what you wanted.`,
+        }),
+        ...(otherLanguages && {
+          otherLanguages,
+          note: `Few results. If "${query}" is not ${language}, search again with the matching language; counts for the other languages are in otherLanguages.`,
+        }),
+        hint: "Use get_product_details with these product IDs to get full product info including nutrition, price, and ingredients.",
+      },
+      null,
+      2
+    );
   }
 
-  return JSON.stringify(
-    {
-      numberOfProducts: result.numberOfProducts,
-      productIds: result.productIds,
-      hint: "Use get_product_details with these product IDs to get full product info including nutrition, price, and ingredients.",
-    },
-    null,
-    2
-  );
+  return JSON.stringify({
+    message: `No products found for "${query}" in any language, including retries with only the last word. Try a single noun or the German term.`,
+    numberOfProducts: 0,
+    productIds: [],
+  });
 }
 
 function formatNutrition(product: Record<string, unknown>): string | null {
