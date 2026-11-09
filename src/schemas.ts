@@ -44,7 +44,7 @@ export const GetPromotionsSchema = z.object({
 
 export const SearchRecipesSchema = z.object({
   query: z.string().optional().describe("Free-text search term, e.g. 'pasta carbonara'."),
-  ingredients: z.array(z.string()).optional().describe("Filter to recipes that use these ingredients."),
+  ingredients: z.array(z.string()).optional().describe("Filter to recipes that use all of these ingredients, named in the search language (e.g. ['Tomate', 'Zwiebel'])."),
   language: z.string().optional().describe("Language code: de, fr, it. Default: de."),
   limit: z.number().int().min(1).max(50).optional().describe("Max recipes to return. Default: 20."),
   offset: z.number().int().min(0).optional().describe("0-based offset for pagination."),
@@ -56,7 +56,8 @@ export const GetRecipeDetailsSchema = z.object({
 });
 
 export const GetRecipeProductsSchema = z.object({
-  recipeId: z.string().describe("Recipe id (UUID) from search_recipes. NOT the slug."),
+  slug: z.string().describe("Recipe slug from search_recipes, get_favorite_recipes or get_cookbooks."),
+  recipeId: z.string().optional().describe("Numeric recipe id (optional, alongside the slug)."),
   language: z.string().optional().describe("Language code. Default: de."),
   limit: z.number().int().min(1).max(100).optional(),
   offset: z.number().int().min(0).optional(),
