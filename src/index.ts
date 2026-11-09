@@ -90,7 +90,7 @@ register(server, "get_promotions",
 // --- Anonymous: recipes (Migusto) ---
 
 register(server, "search_recipes",
-  "Search Migusto (Migros' recipe site) by free-text query and/or ingredients. Returns recipe id, slug, title, cooking time, rating. Use get_recipe_details for full info or get_recipe_products to get Migros product UIDs to add to the basket.",
+  "Search Migusto (Migros' recipe site) by free-text query and/or ingredients. Returns recipe id, slug, title, cooking time, rating. Use get_recipe_details for full info or get_recipe_products (with the slug) to get Migros products to add to the basket.",
   SearchRecipesSchema.shape, (args) => searchRecipes(args));
 
 register(server, "get_recipe_details",
@@ -98,7 +98,7 @@ register(server, "get_recipe_details",
   GetRecipeDetailsSchema.shape, (args) => getRecipeDetails(args));
 
 register(server, "get_recipe_products",
-  "Fetch the Migros products needed for a Migusto recipe — returns product UIDs you can pass directly to add_to_basket. Bridges recipes to shopping. Use the recipe ID from search_recipes (NOT the slug).",
+  "Fetch the Migros products needed for a Migusto recipe — returns product UIDs you can pass directly to add_to_basket. Bridges recipes to shopping. Takes the recipe slug from search_recipes, get_favorite_recipes or get_cookbooks.",
   GetRecipeProductsSchema.shape, (args) => getRecipeProducts(args));
 
 // --- Authenticated: account ---

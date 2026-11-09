@@ -3,6 +3,7 @@ import { client, uniformHeaders } from "./oauth.js";
 import { ingestSetCookie, loadSession, saveSession, type Session } from "./cookies.js";
 import { getJwt } from "./index.js";
 import type { Credentials } from "./login.js";
+import { MIGUSTO } from "../migusto.js";
 
 /**
  * Migusto (migusto.migros.ch) is a Next.js app with its own server-side
@@ -10,32 +11,11 @@ import type { Credentials } from "./login.js";
  * against login.migros.ch — so the SSO cookies we already hold for the
  * www.migros.ch JWT flow are enough to log in silently.
  *
- * There is no public REST API any more: bookmarks and cookbooks are read and
- * written through Next.js server actions, and recipe titles/slugs come from
- * the server-rendered collection pages.
+ * There is no REST API: bookmarks and cookbooks are read and written through
+ * Next.js server actions; page parsing lives in ../migusto.ts.
  */
-export const MIGUSTO = "https://migusto.migros.ch";
 const MIGUSTO_HOST = "migusto.migros.ch";
 const LOGIN_PATH = "/api/auth/login?mode=auto";
-
-export type MigustoLang = "de" | "fr" | "it";
-
-/** Localized route prefixes (from the site's next-intl pathnames table). */
-const ROUTES: Record<MigustoLang, { recipe: string; bookmarks: string; cookbook: string }> = {
-  de: { recipe: "rezepte", bookmarks: "sammlung/merkliste", cookbook: "sammlung/kochbuch" },
-  fr: { recipe: "recettes", bookmarks: "collection/memorise", cookbook: "collection/livre-de-cusine" },
-  it: { recipe: "ricette", bookmarks: "collezione/memorizzate", cookbook: "collezione/ricettario" },
-};
-
-export function recipeUrl(lang: MigustoLang, slug: string, id: string): string {
-  return `${MIGUSTO}/${lang}/${ROUTES[lang].recipe}/${slug}/${id}`;
-}
-export function bookmarksPath(lang: MigustoLang): string {
-  return `/${lang}/${ROUTES[lang].bookmarks}`;
-}
-export function cookbookPath(lang: MigustoLang, bookId: string): string {
-  return `/${lang}/${ROUTES[lang].cookbook}/${encodeURIComponent(bookId)}`;
-}
 
 // ---------------------------------------------------------------------------
 // HTTP
@@ -233,43 +213,6 @@ export async function migustoAction<T>(
 // ---------------------------------------------------------------------------
 // Pages
 // ---------------------------------------------------------------------------
-
-export interface RecipeCard {
-  id: string;
-  slug: string | null;
-  title: string | null;
-}
-
-/** Concatenate the RSC flight payload embedded in a Next.js HTML page. */
-function flightData(html: string): string {
-  let out = "";
-  for (const m of html.matchAll(/self\.__next_f\.push\(\[1,("(?:[^"\\]|\\.)*")\]\)/g)) {
-    try {
-      out += JSON.parse(m[1]) as string;
-    } catch {
-      /* skip malformed chunk */
-    }
-  }
-  return out;
-}
-
-/** Extract recipe cards ({id, title} + {target.recipe.id, slug}) from a page. */
-export function parseRecipeCards(html: string): Map<string, RecipeCard> {
-  const data = flightData(html);
-  const cards = new Map<string, RecipeCard>();
-  const card = (id: string) => {
-    let c = cards.get(id);
-    if (!c) cards.set(id, (c = { id, slug: null, title: null }));
-    return c;
-  };
-  const slugRe = /"type":"RECIPE","recipe":\{"id":"(\d+)","slug":"([^"]+)"/g;
-  for (const m of data.matchAll(slugRe)) card(m[1]).slug = m[2];
-  const titleRe = /\{"id":"(\d+)","title":"((?:[^"\\]|\\.)*)"/g;
-  for (const m of data.matchAll(titleRe)) {
-    if (cards.has(m[1])) card(m[1]).title = JSON.parse(`"${m[2]}"`);
-  }
-  return cards;
-}
 
 /** GET a logged-in Migusto page and return its HTML. */
 export async function migustoPage(path: string, opts: { creds?: Credentials } = {}): Promise<string> {

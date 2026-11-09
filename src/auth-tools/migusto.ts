@@ -1,13 +1,13 @@
+import { migustoAction, migustoPage } from "../auth/migusto.js";
 import {
   bookmarksPath,
   cookbookPath,
-  migustoAction,
-  migustoPage,
+  migustoLang,
   parseRecipeCards,
   recipeUrl,
   type MigustoLang,
   type RecipeCard,
-} from "../auth/migusto.js";
+} from "../migusto.js";
 import { credsFromEnv } from "./_shared.js";
 
 interface ActionResult<T> {
@@ -22,10 +22,6 @@ interface Cookbook {
   imageUrl?: string;
   recipes?: { recipeId: string | number }[];
   recipeIds?: (string | number)[];
-}
-
-function migustoLang(language?: string): MigustoLang {
-  return language === "fr" || language === "it" ? language : "de";
 }
 
 function describe(ids: string[], cards: Map<string, RecipeCard>, lang: MigustoLang) {
@@ -62,7 +58,7 @@ export async function getFavoriteRecipes(args: { language?: string }): Promise<s
       recipes,
       hint:
         recipes.length > 0
-          ? "Use get_recipe_details with a slug for ingredients + instructions, or get_recipe_products with the id."
+          ? "Use get_recipe_details for ingredients + instructions, or get_recipe_products for Migros products — both take the slug."
           : "No favorite recipes saved on Migusto.",
     },
     null,
